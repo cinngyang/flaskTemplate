@@ -1,6 +1,7 @@
 *.conf
 *.exe
 
+.vscode/
 # IPython
 profile_default/
 ipython_config.py
