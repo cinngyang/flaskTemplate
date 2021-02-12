@@ -1,0 +1,101 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+  <!--link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">-->
+  <link rel="icon" href="{{ url_for('static', filename='img/yin-yang.png') }}">
+
+
+  <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
+  <!--script src='https://cdn.plot.ly/plotly-latest.min.js'></script-->
+
+</head>
+
+<body>
+
+  <div class="card">    
+    <div class="card-body">
+      <h5 class="card-title">Card title</h5>
+      <div id="myDiv"></div>      
+      <p class="card-text">card's content.</p>
+      <div class="container">      
+      <a href="{{ url_for('index') }} " class="btn btn-primary">Home</a>
+    </div>
+  </div>
+  <div class="card">    
+    <div class="card-body">
+      <h5 class="card-title">Card title</h5>
+      <div id="graph-1"></div>      
+      <p class="card-text">card's content.</p>
+      <div class="container">      
+      <a href="{{ url_for('index') }} " class="btn btn-primary">Home</a>
+    </div>
+  </div>
+
+  
+
+</body>
+
+<script>
+  var xraw = {{ SerData.x }};
+  var yraw = {{SerData.Qty}};
+  var Ratio = {{SerData.Ratio}};
+  
+
+
+  var trace2 = {
+    x: xraw,
+    y: yraw,
+    name: 'yaxis data',
+    type: 'scatter'
+  };
+
+  var trace1 = {
+    x: xraw,
+    y: Ratio,
+    yaxis: 'y2',
+    name: 'yaxis2 data',
+    type: 'bar'
+  };
+
+  var data = [trace1, trace2];
+
+  var layout = {
+    title: 'Year trend',
+    yaxis: {
+      title: 'Qty'
+    },
+    yaxis2: {
+      title: 'Target',
+      titlefont: {
+        color: 'rgb(148, 103, 189)'
+      },
+      tickfont: {
+        color: 'rgb(148, 103, 189)'
+      },
+      overlaying: 'y',
+      side: 'right'
+    }
+    
+  };
+
+  var graphs = {{ graphJSON|safe }};
+
+  console.log(graphs)
+
+  Plotly.newPlot('myDiv', data, layout, {
+    displaylogo: false
+  });
+
+  Plotly.plot("graph-1", graphs[0].data, graphs[0].layout || {});
+
+</script>
+
+</html>
