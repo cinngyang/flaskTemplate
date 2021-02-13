@@ -1,5 +1,5 @@
 #%%
-from flask import Flask,request ,jsonify,render_template
+from flask import Flask,request ,jsonify,render_template,session,url_for,redirect
 from flask_cors import CORS
 import pandas as pd
 import plotly as py
@@ -14,14 +14,29 @@ CORS(app)
 
 rawData=myds.ChartData()
 
+@app.route('/login/',methods=['GET','POST'])
+def login():
+    #設置session
+    session['username'] = 'chin'
+    session['logged_in']=True #寫入session    
+    print('write session')
+    return redirect(url_for('index'))
+
+
 @app.route('/',methods=['GET','POST'])
-def index():
+def index():    
 
     elements=rawData.HtmlItem()
+    name=session.get('username')
+    logged_in=session.get('username')
+    
+    print(f"name:{name} logged_in:{logged_in}")
+
     return render_template('index.html',elements=elements)
 
 @app.route('/Plotly/',methods=['GET','POST'])
 def LineBar():
+    
     # 測試 Server Size 傳入Data , Clinet 繪圖
     df=rawData.LinChat()
     xRaw=df.loc[:,'Month'].tolist()
@@ -41,14 +56,24 @@ def LineBar():
     
     return render_template('ChartPlyLieBar.html',SerData=SerData,graphJSON =graphJSON )
 
+@app.route('/<Project>/<Function>/<Action>',methods=['GET','POST','PUT'])
+def dipathc(Project,Function,Action):
+    msg={}
+    msg["Project"]=Project
+    msg["Function"]=Function
+    msg["Action"]=Action
+    
+    return  jsonify(msg)
 
-
-
-SerName='0.0.0.0'
-ipPort=8080
-debug=True
 
 if __name__=='__main__':
-    app.run(host=SerName,port=ipPort,debug=debug)
+    # app.config.from_pyfile('config.py') # from instance     
+    app.config.from_object('config')
+    SerName=app.config['HOST']
+    ipPort=app.config['PORT']
+    app.secret_key=app.config['SECRET_KEY']
+
+    app.run(host=SerName,port=ipPort)
+
 
 

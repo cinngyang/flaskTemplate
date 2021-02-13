@@ -2,9 +2,11 @@
 *.exe
 
 .vscode/
+.env/
 # IPython
 profile_default/
 ipython_config.py
+
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -15,6 +17,7 @@ __pycache__/
 # Flask stuff:
 instance/
 .webassets-cache
+config.py
 *.log
 local_settings.py
 db.sqlite3

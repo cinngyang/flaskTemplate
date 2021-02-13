@@ -29,5 +29,17 @@ class ChartData():
     
         return dfData
 
+    def pichart(self):
+        pie = {
+        'values': [100, 50, 30, 20],
+        'labels': ['香蕉', '蘋果', '水梨', '草莓'],
+        'type': 'pie'
+    }
+
+    # 將相關圖表物件以list方式寫入
+    
+
+    
+
 
 
