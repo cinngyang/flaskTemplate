@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    <title>{{PageName}}</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/LexIco.ico') }}">
+
+</head>
+
+<div class="col-lg">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="bg-img">
+                <ul class="nav navbar-nav">
+                    <li class="navbar-brand"> <a href="http://lexrpt02/eFABPlus/Default.aspx">eFab+</a></li>
+                </ul>
+            </div>
+    </nav>
+    <div class="container">
+        <div class="header">
+        {% block content %}
+        </div>
+        {% if file!=""   %}
+        <a name="" id="dShDown" class="btn btn-primary" href= {{ url_for('Download' ,FileName=file) }} role="button">下載 Excel</a>
+        {% endif %}
+                   
+        <div>
+            {{data | safe}}
+        </div>
+        {% endblock %}
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#JqDT1').DataTable({
+            dom: 'Bfrtip',
+            buttons: ['excel', , 'copy'],
+            iDisplayLength: 40,
+        });
+
+    });
+</script>

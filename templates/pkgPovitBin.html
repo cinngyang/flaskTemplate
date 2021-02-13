@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/LexIco.ico') }}">
+    
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plotly.js') }}"></script>
+    
+    <script src="http://cdn.datatables.net/fixedcolumns/3.0.1/css/dataTables.fixedColumns.css"></script>
+    <script src="http://cdn.datatables.net/fixedcolumns/3.0.1/js/dataTables.fixedColumns.min.js"></script>
+    <script src="http://cdn.datatables.net/1.9.4/js/jquery.dataTables.js"></script>
+    <script src="http://cdn.datatables.net/1.9.4/css/jquery.dataTables.css"></script>
+
+
+    <title>PkgPovitBin</title>
+</head>
+
+<body>
+    <div class="container-fluid"><Script></Script>
+        
+        {% block SpecRawData %}
+        {{df | safe}}
+        {%endblock%}
+        
+        
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            
+            
+
+            $('#dfPov').DataTable({
+                "destroy": true, //每一次修改時銷毀資料
+                "clear" : true,
+                "autoWidth": false, //是否要自動調整表格寬度
+                "scrollCollapse": false, //設置是否控制y軸長度自適應
+                "paging": false, //設置是否要開啟y軸內部分頁
+                
+            
+                dom: "<'row'<'col-sm-8 col-md-4'l><'col-sm-8 col-md-2'B>>" +
+                    "<'row'<'col-sm-8'tr>>" 
+                    +"<'row'<'col-sm-8 col-md-2'i><'col-sm-8 col-md-10'p>>",
+                    
+                buttons: ['copy', 'excel'],
+                "language": {
+                    "info": "顯示第 _START_ 至 _END_ 項結果，共 _TOTAL_ 項",
+                    "paginate": {
+                        "first": "第一頁",
+                        "previous": "上一頁",
+                        "next": "下一頁",
+                        "last": "最後一頁"
+                    },
+                    
+                },  
+                
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        strHtm = column.header();
+                        vName = strHtm.innerText;
+                        var array = ['CIE','WL', 'IV', 'VF' ]
+                        if ($.inArray(vName, array) > 0) {
+                            var select = $('<select><option value=""></option></select>')
+                                .appendTo($(column.header()))
+                                .on('change', function () {
+                                    var val = $.fn.dataTable.util.escapeRegex(
+                                        $(this).val()
+                                    );
+                                    column
+                                        .search(val ? '^' + val + '$' : '', true, false)
+                                        .draw();
+                                });
+                            column.data().unique().sort().each(function (d, j) {
+                                select.append('<option value="' + d + '">' + d +
+                                    '</option>')
+                            });
+                        };
+                    });
+                },
+                
+            });
+
+            
+
+
+
+            $('#dfPov').dataTable();
+
+            $('#dfPov').on( 'length.dt', function ( e, settings, len ) {
+                Show();
+                console.log( 'New page length: '+len );;
+            } );
+            
+            $('#dfPov').on( 'page.dt', function () {
+                var info = table.page.info();
+                Show();
+                $('#pageInfo').html( 'Showing page: '+info.page+' of '+info.pages );    
+            } );
+            
+            Show();
+        });
+        
+        function Show() {
+            dfData = $("#dfPov td");
+            
+            //console.log(dfData[0]);
+            $("#dfPov td").each(function (index) {
+                $td = $(this);
+                var valData = $td.text();
+            
+                if (valData == "S") {
+                    $td.addClass("bg-warning")
+                }
+                if (valData == "DG") {
+                    $td.addClass("bg-danger")
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

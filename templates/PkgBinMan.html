@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKG 庫存 Bincode 規格查詢</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/LexIco.ico') }}">
+
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plotly.js') }}"></script>
+
+    <style type="text/css">
+        .panel-heading .accordion-toggle:before {
+            content: "－";
+        }
+
+        .panel-heading .accordion-toggle.collapsed:before {
+            content: "＋";
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-default container-fluid">
+
+        <div class="bg-img container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="navbar-brand"> <a href="http://lexrpt02/eFABPlus/Default.aspx">
+                        <p class="text-white">eFab+</p>
+                    </a></li>
+            </ul>            
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <button type="button" class="btn btn-primary" id='bTitle'>
+            <h4>PKG 庫存 Bincode 規格查詢<span class="badge badge-light" onclick="NoteMsg()">顯示/隱藏</span></h4>
+        </button>
+        <p id='Note' class="alert alert-success" role="alert">
+            PART_GROUP: 95 ! 尾碼 N/Z/S 取代為 N <br>
+            95.S3806.W0A0EHN/95.S3806.W0A0C8N 可替代<br>
+            90天週轉率: 0-90下線/30-90天入庫 , 下線(出貨+工單領用)<br>
+            有庫存不合規:F/G 內非 Main Bin<br>
+            持續入庫未出貨:30 天內有入庫, 0-90 未下線<br>
+
+        </p>
+        {% block SpecRawData %}
+        <section class="panel panel-default" id='MgSummary'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post1">
+                        關 BIN 彙整 by Model Group
+                    </a>
+                </h2>
+            </header>
+            <footer id="post1" class="panel-collapse collapse">
+                <p class="panel-body">
+                    {#週轉率 Model Group Summary#}
+                    {{dfMG | safe}}
+                </p>
+
+            </footer>
+        </section>
+        <section class="panel panel-default" id='MdSummary'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post2">
+                        關 BIN 彙整 by Model Name
+                    </a>
+                </h2>
+            </header>
+            <footer id="post2" class="panel-collapse collapse">
+                <p class="panel-body">
+                    {#週轉率 Model Summary#}
+                    {{dfMD | safe}}
+
+                </p>
+
+            </footer>
+        </section>
+        {% endblock %}
+        <section class="panel panel-default" id='PartSummary'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post3">
+                        關 BIN 彙整 by 料號
+                    </a>
+                </h2>
+            </header>
+            <footer id="post3" class="panel-collapse collapse">
+                <p class="panel-body">                    
+                    <div class="row">
+                        <div class="col-sm">
+                            <input type="text" id="iModel" class="form-control" placeholder="Model Name">
+                        </div>
+                        <div class="col-sm">
+                            <button type="button" class="btn btn-primary" onclick="GetPartSum()">Submit</button>
+                        </div>
+                    </div>
+                    <table id='dfPart' class='table table-sm'>
+                        <thead></thead>
+
+                    </table>
+
+                </p>
+
+            </footer>
+        </section>
+        <section class="panel panel-default" id='PartBin'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post4">
+                        料號 Bincode 查詢
+                    </a>
+                </h2>
+            </header>
+            <footer id="post4" class="panel-collapse collapse">
+                <p class="panel-body">
+                    <p id='NotePart' class="alert alert-success" role="alert">
+                        90天入庫: N-60 ~ N-90 入庫 , 120天入庫: N-60 ~ N-90 入庫<br>
+                        下線 : 工單領用 + 出貨(F/G Material)
+                        360天入庫: N-0 ~ N-360 入庫<br>
+                        360 周轉率 : 0-360 下線/0-360 入庫
+
+                                    
+                    </p>
+                    <div class="row">
+                        <div class="col-sm">
+                            <input type="text" id="iPart" class="form-control" placeholder="Part No">
+                        </div>
+                        <div class="col-sm">
+                            <button type="button" class="btn btn-primary" onclick="GetPartBin()">Submit</button>
+                        </div>
+                    </div>
+                    <table id='dfBin' class='table table-sm'>
+                        <thead></thead>
+
+                    </table>
+
+                </p>
+
+            </footer>
+        </section>
+        <section class="panel panel-default" id='PovitBin'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post5">
+                        Bincode 樞紐
+                    </a>
+                </h2>
+            </header>
+            <footer id="post5" class="panel-collapse collapse">
+                <p class="panel-body">
+                    <div class="row">
+                        <div class="col-sm">
+                            <input type="text" id="iPartBin" class="form-control" placeholder="Part No">
+
+                        </div>
+                        <div class="col-sm">
+                            <select class="browser-default custom-select mb-4" id='SelType'>
+                                <option value="" disabled></option>
+                                <option value="TV" selected>TV(WL-VF-IVxCIE)</option>
+                                <option value="NonAuo">NonAuo(CIExIV)</option>
+                                <option value="IT">IT(IV-VF-CIEYxCIEX)</option>
+                                <option value="LT">LT(VF-CIExIV)</option>
+                                <option value="Others">Others(IV-VFxCIE)</option>
+                            </select>
+                        </div>
+                        <div class="col-sm">
+                            <button type="button" class="btn btn-primary" onclick="GetPovitBin()">Submit</button>
+                        </div>
+                    </div>
+                    <table id='dfPovitBin' class='table table-sm'>
+                        <thead></thead>
+
+                    </table>
+
+                </p>
+
+            </footer>
+        </section>
+    </div>
+
+</body>
+<script>
+    /*顯示隱藏註解 */
+    function NoteMsg() {
+        $('#Note').toggle();
+    };
+
+
+
+    /*TODO:Page Init*/
+    $(document).ready(function () {
+
+        $('#dfMG').DataTable({
+
+            dom: "<'row'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-2'B>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
+            buttons: ['copy', 'excel'],
+            "language": {
+                "info": "顯示第 _START_ 至 _END_ 項結果，共 _TOTAL_ 項",
+                "paginate": {
+                    "first": "第一頁",
+                    "previous": "上一頁",
+                    "next": "下一頁",
+                    "last": "最後一頁"
+                },
+
+            }
+        });
+
+        $('#dfMD').DataTable({
+            "destroy": true,
+            dom: "<'row'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-2'B>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-2'i><'col-sm-12 col-md-10'p>>",
+            buttons: ['copy', 'excel'],
+            "language": {
+                "info": "顯示第 _START_ 至 _END_ 項結果，共 _TOTAL_ 項",
+                "paginate": {
+                    "first": "第一頁",
+                    "previous": "上一頁",
+                    "next": "下一頁",
+                    "last": "最後一頁"
+                },
+            }
+
+        });
+
+        NoteMsg();
+
+    })
+
+
+    /*Query Data POST */
+    async function QueryData(url, objBody) {
+
+        const response = await fetch(url, {
+
+            method: 'POST',
+            body: JSON.stringify(objBody),
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+
+        }).then(res => {
+            return res.json();
+        }).then(result => {
+            objData = result;
+            console.log(objData);
+            console.log('Fetch donw');
+            return objData;
+        });
+
+        return response;
+    };
+
+    /*取資料 */
+    async function GetPartSum() {
+        /*Query Model 資料*/
+        var Model = $('#iModel').val();
+
+        if (Model == "") {
+            alert("請輸入 Model Name")
+        } else {
+
+            let url = 'http://lexapp15:6500/PkgSpecTurn';
+
+            var data = {
+                apName: 'PkgSpecTurnRate',
+                function: 'GetModelPart',
+                Model: Model
+            };
+
+            result = await QueryData(url, data)
+
+            $('#dfPart').empty();
+
+            $('#dfPart').DataTable({
+                "destroy": true,
+                dom: "<'row'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-2'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
+                buttons: ['copy', 'excel'],
+                data: objData.data,
+                columns: [{
+                        title: "BG"
+                    },
+                    {
+                        title: "MODEL_GROUP"
+                    },
+                    {
+                        title: "MODEL_NAME"
+                    },
+                    {
+                        title: "PRODUCTNO"
+                    },
+                    {
+                        title: "FG庫存",
+                        render: $.fn.dataTable.render.number(',')
+                    },
+                    {
+                        title: "30天入庫料號數",
+                        render: $.fn.dataTable.render.number(',')
+                    },
+                    {
+                        title: "有庫存不合規BIN數"
+                    },
+                    {
+                        title: "有庫存不合規數量",
+                        render: $.fn.dataTable.render.number(',')
+                    },
+                    {
+                        title: "30天入庫",
+                        render: $.fn.dataTable.render.number(',')
+                    },
+                    {
+                        title: "30天入庫BIN數"
+                    },
+                    {
+                        title: "持續入庫未出貨BIN數"
+                    },
+                    {
+                        title: "持續入庫未出貨數量",
+                        render: $.fn.dataTable.render.number(',')
+                    },
+                    {
+                        title: "單BIN平均入庫數",
+                        render: $.fn.dataTable.render.number(',')
+                    }
+                ],
+
+            });
+
+        }
+
+    };
+
+    async function GetPartBin() {
+        /*Query Model 資料*/
+        var Part = $('#iPart').val();
+        $('#iPartBin').val(Part);
+
+        if (Part == "") {
+            alert("輸入料號")
+        } else {
+
+            let url = 'http://lexapp15:6500/PkgSpecTurn';
+
+            var data = {
+                apName: 'PkgSpecTurnRate',
+                function: 'GetModelPart',
+                Part: Part
+            };
+
+            result = await QueryData(url, data)
+            await console.log(result);
+            await console.log(objData);
+
+
+            $('#dfBin').DataTable({
+                dom: "<'row'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-2'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
+                buttons: ['copy', 'excel'],
+                "destroy": true,
+                data: objData.data,
+                columns: [{
+                        title: "PART_GROUP"
+                    },
+                    {
+                        title: "PRODUCTNO"
+                    },
+                    {
+                        title: "BINCODE"
+                    },
+                    {
+                        title: "MIN_AGE"
+                    },
+                    {
+                        title: "BINTYPE"
+                    },
+                    {
+                        title: "庫存",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "30天入庫",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "90天入庫",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "120天入庫",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "360天入庫",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "90天出貨",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "90天下線",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "120天下線",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "360天下線",
+                        render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "90天週轉率",
+                        //render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "90週轉",
+                        //render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "120天週轉率",
+                        //render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "360天週轉率",
+                        //render: $.fn.dataTable.render.number(',', '.', 0, '')
+                    },
+                    {
+                        title: "分類"
+                    },
+                    {
+                        title: "WL"
+                    },
+                    {
+                        title: "CIE"
+                    },
+                    {
+                        title: "IV"
+                    },
+                    {
+                        title: "VF"
+                    }
+                ],
+
+                buttons: ['excel'],
+                iDisplayLength: 15,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d +
+                                '</option>')
+                        });
+                    });
+                }
+            });
+
+
+
+
+        }
+
+    };
+
+    async function GetPovitBin() {
+        /*Query Model 資料*/
+        var Part = $('#iPartBin').val();
+        var PovitType = $('#SelType').val();
+
+        if ($.fn.DataTable.isDataTable('#dfPovitBin')) {
+            $('#dfPovitBin').DataTable().destroy();
+            $('#dfPovitBin').empty();
+        };
+
+
+        if (iPartBin == "" || PovitType == "") {
+            alert("輸入料號 與 型態")
+        } else {
+
+            let url = 'http://lexapp15:6500/PkgSpecTurn';
+
+            var data = {
+                apName: 'PkgSpecTurnRate',
+                function: 'GetPovitBin',
+                Part: Part,
+                PovitType: PovitType
+            };
+
+
+            result = await QueryData(url, data)
+            await console.log(result);
+            await console.log(objData);
+
+            var icols = [];
+
+            $.each(result.columns, function (index, val) {
+                icols.push({
+                    title: val
+                })
+            })
+
+
+            $('#dfPovitBin').DataTable({
+                dom: "<'row'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-2'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
+                buttons: ['copy', 'excel'],
+                "destroy": true,
+                "clear" : true,
+                data: objData.data,
+                columns: icols,
+                iDisplayLength: 50,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        strHtm = column.header();
+                        vName = strHtm.innerText;
+                        var array = ['CIE', 'IV', 'VF', 'WL' ]
+                        if ($.inArray(vName, array) > 0) {
+                        
+                            var select = $('<select><option value=""></option></select>')
+                                .appendTo($(column.header()))
+                                .on('change', function () {
+                                    var val = $.fn.dataTable.util.escapeRegex(
+                                        $(this).val()
+                                    );
+
+                                    column
+                                        .search(val ? '^' + val + '$' : '', true, false)
+                                        .draw();
+                                });
+
+                            column.data().unique().sort().each(function (d, j) {
+                                select.append('<option value="' + d + '">' + d +
+                                    '</option>')
+                            });
+                        }
+                    });
+                },
+
+
+            });
+
+            Show();
+
+        }
+
+    };
+
+    function Show() {
+        dfData = $("#dfPovitBin td");
+
+        //console.log(dfData[0]);
+
+        $("#dfPovitBin td").each(function (index) {
+            $td = $(this);
+            var valData = $td.text();
+            if (valData == "S") {
+                $td.addClass("bg-warning")
+            }
+            if (valData == "DG") {
+                $td.addClass("bg-danger")
+            }
+
+        });
+
+    }
+</script>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKG PM 規格開啟</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/LexIco.ico') }}">
+
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plotly.js') }}"></script>
+</head>
+
+<body>
+    <div class="container">
+        <p id='Note' class="alert alert-success" role="alert">
+            PKG 關閉 BIN Code 開啟
+
+        </p>
+        <ul class="nav justify-content-end">
+            <button type="submit" class="btn btn-primary col-lg-1" onclick='UpdateBinType()' id='UpdateBinType'>開啟
+                Bin</button>
+        </ul>
+        <table id='dfPart' class='table table-sm  col-lg-11'>
+            <thead></thead>
+
+        </table>
+    </div>
+
+
+</body>
+<script>
+    var url = 'http://Lexapp15:6500/api/RunScript';
+
+
+    /*Query Data POST */
+    async function QueryData(url, objBody) {
+
+        const response = await fetch(url, {
+
+            method: 'POST',
+            body: JSON.stringify(objBody),
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+
+        }).then(res => {
+            return res.json();
+        }).then(result => {
+            objData = result;
+            console.log(objData);
+            console.log('Fetch donw');
+            return objData;
+        });
+
+        return response;
+    };
+
+    async function GetBinStatus() {
+        /*Query Model 資料*/
+
+        var data = {
+            apName: 'PkgSpecTurnRate',
+            function: 'BinOffList',
+        };
+
+        result = await QueryData(url, data)
+        var icols = [];
+
+        $.each(result.columns, function (index, val) {
+            icols.push({
+                title: val
+            })
+        })
+
+        $('#dfPart').empty();
+
+        $('#dfPart').DataTable({
+            "destroy": true,
+            dom: "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'f><'col-sm-12 col-md-3'B>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            data: result.data,
+            columns: icols,
+            buttons: ['excel', 'copy'],
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    strHtm = column.header();
+                    vName = strHtm.innerText;
+                    console.log(vName)
+                    var array = ['PartNo', 'BINCODE', 'ModelName']
+                    if ($.inArray(vName, array) > -1) {
+
+                        var select = $('<select><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d +
+                                '</option>')
+                        });
+                    }
+                });
+
+            },
+            iDisplayLength: 50,
+            columnDefs: [{
+                    //   指定 第一列
+                    "targets": 9,
+                    "render": function (data, type, row, meta) {
+                        var v = row[2] + ';' + row[4];
+                        return '<input type="checkbox" class="form-check-input" value="' + v +
+                            '" />' + row[9] + "</input>"
+                    },
+                },
+                {
+                    //  
+                    //"targets": [5, 6],
+                    //"render": $.fn.dataTable.render.number(',')
+
+                }
+            ]
+
+        });
+
+
+
+    };
+
+    async function UpdateBinType() {
+        var BINCODE = [];
+
+        var input = $("input:checked");
+        $.each(input, function (index, val) {
+            BINCODE.push(
+                val.value
+            )
+
+        });
+
+        var Msgdata = {
+            apName: 'PkgSpecTurnRate',
+            function: 'TurnOnBin',
+            BINCODE: BINCODE,
+            USER: 'WebAPI'
+        };
+
+        result = await QueryData(url, Msgdata);
+        alert('更新成功');
+        GetBinStatus();
+
+
+    }
+
+    $(document).ready(function () {
+
+        GetBinStatus();
+    });
+</script>
+
+</html>

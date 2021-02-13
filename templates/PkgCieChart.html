@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/LexIco.ico') }}">
+
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plotly.js') }}"></script>
+
+
+    <style type="text/css">
+        .panel-heading .accordion-toggle:before {
+            content: "－";
+        }
+
+        .panel-heading .accordion-toggle.collapsed:before {
+            content: "＋";
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="ontainer-fluid">
+        <div class="progress" style="display:none">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
+                aria-valuemin="0" aria-valuemax="100" style="width: 75%">
+            </div>
+        </div>
+        <section class="panel panel-default" id='MdSummary'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post1">
+                        Customer Model Name 彙整 by PKG Model
+                    </a>
+                </h2>
+            </header>
+            <footer id="post1" class="panel-collapse collapse">
+                <p class="panel-body">
+                    <div class="col-sm">
+                        <label for=" Part NO">Part NO:</label>
+                        <input type="text" id="iModel">
+                        <button type="submit" class="btn btn-primary" onclick='GetCMNbyMd()'
+                            id='GetModel'>Submit</button>
+                        <table id='dfCMNbyMd' class="table table-sm" style=" width:100%"></table>
+                        <div>
+
+                </p>
+            </footer>
+        </section>
+        <section class="panel panel-default" id='CMNQuery'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post2">
+                        Customer Model Name 清單查詢
+                    </a>
+                </h2>
+            </header>
+            <footer id="post2" class="panel-collapse collapse">
+                <p class="panel-body">
+                    <div class="col-sm">
+                        <label for="Customer Model Name">Customer Model Name:</label>
+                        <input type="text" id="iCMN">
+                        <button type="submit" class="btn btn-primary" onclick='GetCMNList()'
+                            id='GetCMNList'>Submit</button>
+                        <table id='dfCMNList' class="table table-sm" style=" width:100%"></table>
+                        <div>
+
+                </p>
+
+            </footer>
+        </section>
+        <section class="panel panel-default" id='Chart'>
+            <header class="panel-heading">
+                <h2 class="panel-title bg-primary">
+                    <a class="accordion-toggle collapsed bg-primary text-white" data-toggle="collapse"
+                        data-parent="#accordion" href="#post3">
+                        規格查尋 by 料號
+                    </a>
+                </h2>
+            </header>
+            <footer id="post3" class="panel-collapse collapse">
+                <p class="panel-body">
+                    <div class="col-sm">
+                        <div class="row">
+                            <div class="col-sm">
+                                <input type="text" id="iPart">
+                                <button type="submit" class="btn btn-primary" onclick='GetCie()'
+                                    id='GetPart'>Submit</button>
+                                <button type="submit" class="btn btn-primary" onclick='ReloadChart()'
+                                    id='ReLoadChart'>ReloadChart</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="Chart" id="myChart"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <table id='dfCMNBin' class="table table-sm" style=" width:100%"> </table>
+                            </div>
+
+
+
+
+                </p>
+
+            </footer>
+        </section>
+
+
+
+
+
+    </div>
+
+</body>
+<script charset="utf-8">
+    var objData;
+    var d3 = Plotly.d3
+    const url = 'http://lexapp15:6500/PkgCieChart';
+
+    $(document).ready(function () {
+
+        $('#iModel').val('PS06W12.3');
+        $('#iCMN').val('B140HAN04.2');
+        $('#iPart').val('95.S3806.W0A0AZN');
+
+    });
+
+    async function GetCMNbyMd() {
+
+        var Model = $('#iModel').val();
+        $(".progress").modal('show');
+
+        ;
+        var data = {
+            apName: 'PkgSpecTurnRate',
+            function: 'GetCMNByModel',
+            Model: Model,
+        };
+
+        result = await QueryData(url, data)
+
+        var icols = [];
+
+        $.each(result.columns, function (index, val) {
+            icols.push({
+                title: val
+            })
+        })
+
+        $('#dfCMNbyMd').DataTable({
+            dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'l>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "destroy": true,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    strHtm = column.header();
+                    vName = strHtm.innerText;
+                    var array = ['PKGMODEL', '', 'FCST_LINE', 'UPDATETIME', 'VF 數', 'IV 數',
+                        '生效料號', 'CIE 數'
+                    ]
+                    if ($.inArray(vName, array) == -1) {
+
+                        var select = $('<select><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d +
+                                '</option>')
+                        });
+                    };
+                });
+            },
+            buttons: ['excel', 'copy'],
+            "destroy": true,
+            data: objData.data,
+            columns: icols,
+            iDisplayLength: 50,
+
+
+        });
+        $(".progress").modal('hide');
+
+    };
+
+    async function GetCMNList() {
+
+        var CMN = $('#iCMN').val();
+        $(".progress").modal('show');
+
+
+        var data = {
+            apName: 'PkgSpecTurnRate',
+            function: 'GetCMNList',
+            CMN: CMN,
+        };
+
+        result = await QueryData(url, data)
+
+        var icols = [];
+
+        $.each(result.columns, function (index, val) {
+            icols.push({
+                title: val
+            })
+        })
+
+        $('#dfCMNList').DataTable({
+
+            "destroy": true,
+            buttons: ['excel', 'copy'],
+            data: objData.data,
+            columns: icols,
+            iDisplayLength: 50,
+
+
+        });
+
+        $(".progress").modal('hide');
+
+    };
+
+    async function GetCie() {
+
+        var Part = $('#iPart').val();
+        //$(".progress").modal('show');
+
+
+        var data = {
+            apName: 'CMN',
+            function: 'PMSpecByPart',
+            Part: Part
+        };
+        result = await QueryData(url, data)
+
+
+        //$(".progress").modal('hide');
+
+
+        result = await QueryData(url, data)
+        var icols = [];
+
+        $.each(result.columns, function (index, val) {
+            icols.push({
+                title: val
+            })
+        })
+
+        $('#dfCMNBin').DataTable({
+
+            dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'l>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "destroy": true,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    strHtm = column.header();
+                    vName = strHtm.innerText;
+                    var array = ['SET_NO', 'VERSION'];
+                    if ($.inArray(vName, array) == -1) {
+
+                        var select = $('<select><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d +
+                                '</option>')
+                        });
+                    };
+                });
+            },
+            buttons: ['excel', 'copy'],
+            data: objData.data,
+            columns: icols,
+            iDisplayLength: 50,
+            columnDefs: [{
+                //   指定第四列，從0開始，0表示第一列，1表示第二列……
+                "targets": 0,
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="form-check-input" value="' + row[0] +
+                        '" />' + row[0] + "</input>"
+                }
+            }],
+
+
+        });
+
+
+    };
+
+    async function QueryData(url, objBody) {
+
+        const response = await fetch(url, {
+
+            method: 'POST',
+            body: JSON.stringify(objBody),
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+
+        }).then(res => {
+            return res.json();
+        }).then(result => {
+            objData = result;
+            console.log('Fetch donw');
+            return objData;
+        });
+
+        return response;
+    };
+
+    function DrawCie(title, vData, vCieText) {
+
+        var layout = {
+
+            title: title,
+            xaxis: {
+                autorange: true,
+                zeroline: false
+            },
+            yaxis: {
+                autorange: true,
+                showgrid: true
+            },
+            width: 600,
+            height: 500,
+            shapes: [{
+                type: 'path',
+                path: vData,
+                line: {
+                    color: 'rgb(25, 14, 243)'
+                },
+                fillcolor: 'rgba(55, 128, 191, 0.6)'
+            }, ]
+
+        };
+
+        var data = [vCieText];
+        var config = {
+            responsive: true
+        }
+
+        Plotly.newPlot('myChart', data, layout, config);
+    };
+
+    async function ReloadChart() {
+
+        var SN = [];
+        var input = $("input:checked");
+        $.each(input, function (index, val) {
+            SN.push(
+                val.value
+            )
+
+        });
+
+        var Msgdata = {
+            apName: 'CMN',
+            function: 'PMSpecBySNs',
+            SnList: SN
+        };
+        result = await QueryData(url, Msgdata);
+
+        var title = "CIE 規格";
+
+        var SnPoxy=result[0]
+        var Bincode = result[2];
+        var SnCenter = result[1];
+        
+        var layout = {
+
+            title: title,
+            showlegend: true,
+            xaxis: {
+                autorange: true,
+                zeroline: false
+            },
+            yaxis: {
+                autorange: true,
+                showgrid: true
+            },
+            shapes: SnPoxy,
+        };
+    
+
+        Plotly.newPlot('myChart', [Bincode, SnCenter], layout);
+    }
+
+
+</script>
+
+
+</html>
