@@ -15,6 +15,23 @@ CORS(app)
 
 rawData=myds.ChartData()
 
+@app.route('/',methods=['GET','POST'])
+def index():    
+
+    elements=rawData.HtmlItem()
+    name=session.get('username')
+<<<<<<< HEAD
+    logged_in=session.get('username')
+    
+   # print(f"name:{name} logged_in:{logged_in}")
+=======
+    logged_in=session.get('username')    
+    print(f"name:{name} logged_in:{logged_in}")
+>>>>>>> 000e01eb9429488b16ebe2ba336bb4a2f32b6ebc
+
+    return render_template('index.html',elements=elements)
+
+
 @app.route('/login/',methods=['GET','POST'])
 def login():
     #設置session
@@ -23,17 +40,6 @@ def login():
     print('write session')
     return redirect(url_for('index'))
 
-
-@app.route('/',methods=['GET','POST'])
-def index():    
-
-    elements=rawData.HtmlItem()
-    name=session.get('username')
-    logged_in=session.get('username')
-    
-   # print(f"name:{name} logged_in:{logged_in}")
-
-    return render_template('index.html',elements=elements)
 
 @app.route('/Plotly/',methods=['GET','POST'])
 def LineBar():
