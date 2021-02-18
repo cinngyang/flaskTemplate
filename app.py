@@ -18,19 +18,7 @@ rawData=myds.ChartData()
 @app.route('/',methods=['GET','POST'])
 def index():
 
-  
-
-    return render_template('index.html',elements=elements)
-
-
-@app.route('/login/',methods=['GET','POST'])
-def login():
-    #設置session
-    session['username'] = 'chin'
-    session['logged_in']=True #寫入session    
-    print('write session')
-    return redirect(url_for('index'))
-
+    return render_template('index.html')
 
 @app.route('/Plotly/',methods=['GET','POST'])
 def LineBar():
@@ -54,8 +42,21 @@ def LineBar():
     
     return render_template('ChartPlyLieBar.html',SerData=SerData,graphJSON =graphJSON )
 
+@app.route('/login/',methods=['GET','POST'])
+def login():
+    
+    #設置session
+    session['username'] = 'chin'
+    session['logged_in']=True #寫入session    
+    
+    elements=rawData.HtmlItem()
+    return render_template('Grid.html',elements=elements)
+    #return redirect(url_for('index'))
+
+
 @app.route('/<Project>/<Function>/<Action>',methods=['GET','POST','PUT'])
 def dipathc(Project,Function,Action):
+    # 動態 Routing
     msg={}
     msg["Project"]=Project
     msg["Function"]=Function
