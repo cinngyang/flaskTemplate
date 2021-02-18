@@ -1,3 +1,4 @@
+# coding=utf-8
 #%%
 from flask import Flask,request ,jsonify,render_template,session,url_for,redirect
 from flask_cors import CORS
@@ -30,7 +31,7 @@ def index():
     name=session.get('username')
     logged_in=session.get('username')
     
-    print(f"name:{name} logged_in:{logged_in}")
+   # print(f"name:{name} logged_in:{logged_in}")
 
     return render_template('index.html',elements=elements)
 
@@ -67,13 +68,13 @@ def dipathc(Project,Function,Action):
 
 
 if __name__=='__main__':
-    # app.config.from_pyfile('config.py') # from instance     
+    #app.config.from_pyfile('config.py') # from instance     
     app.config.from_object('config')
     SerName=app.config['HOST']
     ipPort=app.config['PORT']
     app.secret_key=app.config['SECRET_KEY']
 
-    app.run(host=SerName,port=ipPort)
+    app.run(host=SerName,port=ipPort,threaded=True)
 
 
 
