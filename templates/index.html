@@ -1,28 +1,18 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
-    <script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
-    <title>Glass Website</title>
-    <link rel="stylesheet" href="./static/css/style.css" />
-</head>
+
 
 <body>
-    <main>
+    {% block content %}
+    {{super()}}    
         <section class="glass">
             <div class="dashboard">
                 <div class="user">
                     <img src="./static/img/icons8-fenix-48.png" alt="" />
                     <h3>Hello World</h3>
-                    <p>CSS Style</p>
+                    <a href="{{ url_for('logout') }}">logout</a>                   
                 </div>
                 <div class="links">
                     <div class="link">                        
@@ -81,10 +71,10 @@
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </section> 
     <div class="circle1"></div>
     <div class="circle2"></div>
+    {% endblock content %}
 </body>
 
 </html>
