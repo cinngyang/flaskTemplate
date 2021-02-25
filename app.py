@@ -13,7 +13,7 @@ from myLib import Lexform
 import DataSource as myds
 
 
-#csrf = CsrfProtect()
+csrf = CsrfProtect()
 # login manager
 login_manager = LoginManager()
 app=Flask(__name__)
@@ -21,7 +21,7 @@ app=Flask(__name__)
 # 安全性設置
 CORS(app)
 #csrf token
-#csrf.init_app(app)
+csrf.init_app(app)
 login_manager.init_app(app)
 
 
@@ -60,6 +60,7 @@ def index():
         return render_template('index.html')
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/Plotly/',methods=['GET','POST'])
 def LineBar():
@@ -128,20 +129,22 @@ def dipathc(Project,Function,Action):
     return  jsonify(msg)
 
 
+
+
 # handle login failed
 @app.errorhandler(401)
 def page_not_found(e):
 
     return redirect(url_for('login'))
 
-if __name__=='__main__':
-    #app.config.from_pyfile('config.py') # from instance     
-    app.config.from_object('config')
-    SerName=app.config['HOST']
-    ipPort=app.config['PORT']
-    app.secret_key=app.config['SECRET_KEY']
+    if __name__=='__main__':
+        #app.config.from_pyfile('config.py') # from instance     
+        app.config.from_object('config')
+        SerName=app.config['HOST']
+        ipPort=app.config['PORT']
+        app.secret_key=app.config['SECRET_KEY']
 
-    app.run(host=SerName,port=ipPort,threaded=True)
+        app.run(host=SerName,port=ipPort,threaded=True)
 
 
 
