@@ -16,6 +16,7 @@ import DataSource as myds
 csrf = CsrfProtect()
 # login manager
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 app=Flask(__name__)
 
 # 安全性設置
@@ -116,7 +117,15 @@ def login():
     # elements=rawData.HtmlItem()
     # return render_template('Grid.html',elements=elements)
     # #return redirect(url_for('index'))
-    
+
+
+@app.route('/logout') 
+def logout():
+    """ 
+    logout\_user會將所有的相關session資訊給pop掉 
+    """ 
+    logout_user() 
+    return redirect(url_for('login'))
 
 @app.route('/<Project>/<Function>/<Action>',methods=['GET','POST','PUT'])
 def dipathc(Project,Function,Action):

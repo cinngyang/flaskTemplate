@@ -2,6 +2,7 @@
 *.exe
 *.pyc
 
+
 .vscode/
 .env/
 # IPython
