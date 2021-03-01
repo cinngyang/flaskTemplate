@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+    <!--link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">-->
+    <link rel="icon" href="{{ url_for('static', filename='img/yin-yang.png') }}">
+
+
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
+
+    <title>Landing Page</title>
+</head>
+
+<body>
+    <div class="jumbotron">
+        <h2 class="display-4">Hello, world!</h2>
+        <p class="lead">This is a simple hero unit</p>
+        <hr class="my-4">
+        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+        <p class="lead">
+        
+            <a class="btn btn-primary btn-lg" href="{{ url_for('LineBar') }}" role="button">ChartPlyLiBar</a>
+        </p>
+    </div>
+
+    <div class="container">
+        {% for row in elements|batch(3) %}
+        <div class="row">
+            {% for column in row %}
+            <div class="col-2">
+                <button type="button" class="btn btn-primary btn-lg">{{ column }}</button>
+            </div>
+            {% endfor %}
+        </div>
+        <p>
+            {% endfor %}
+    </div>
+
+</body>
+
+</html>
