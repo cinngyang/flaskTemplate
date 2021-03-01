@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.dataTables.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/yin-yang.png') }}">
+
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
+
+    <title>Landing Page</title>
+</head>
+
+<body>
+    <main>
+        <section class="glass">
+            <div class="dashboard">
+
+                <div class="container">
+                    <br>
+                    <a href="{{ url_for('index') }}">Home</a>                  
+                    <hr>
+                    <form method="post">
+                                    
+                        <div class="form-group">
+                            {{ form.csrf_token }}     
+                            {{ form.username.label }}
+                            {% if form.username.errors %}
+                            {{ form.username(class='form-control is-invalid') }}
+                            {% for error in form.username.errors %}
+                            <div class="invalid-feedback">
+                                {{ error }}
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            {{ form.username(class='form-control') }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.password.label }}
+                            {% if form.password.errors %}
+                            {{ form.password(class='form-control is-invalid') }}
+                            {% for error in form.password.errors %}
+                            <div class="invalid-feedback">
+                                {{ error }}
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            {{ form.password(class='form-control') }}
+                            {% endif %}
+                        </div>
+                        <div class="form-check">
+                            {{ form.remember(class='form-check-input') }}
+                            {{ form.remember.label }}
+                        </div>
+                        {{ form.submit(class='btn btn-primary') }}
+                    </form>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+</body>
+
+
+
+</html>

@@ -1,5 +1,7 @@
 *.conf
 *.exe
+*.pyc
+
 
 .vscode/
 .env/
